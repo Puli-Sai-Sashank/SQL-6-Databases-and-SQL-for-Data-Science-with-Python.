@@ -1,0 +1,48 @@
+!pip install ipython-sql prettytable
+import prettytable
+
+prettytable.DEFAULT = 'DEFAULT'
+
+import csv, sqlite3
+!pip install pandas
+conn = sqlite3.connect('FinalDB.db')
+cursor_obj = conn.cursor()
+
+%load_ext sql
+
+import pandas
+df = pandas.read_csv('ChicagoCensusData.csv')
+df.to_sql("ChicagoCensusData", conn, if_exists='replace', index=False,method="multi")
+
+df1 = pandas.read_csv('ChicagoCrimeData.csv')
+df1.to_sql("ChicagoCrimeData", conn, if_exists='replace', index=False,method="multi")
+
+df2 = pandas.read_csv('ChicagoPublicSchools.csv')
+df2.to_sql("ChicagoPublicSchools", conn, if_exists='replace', index=False,method="multi")
+
+%sql sqlite:///FinalDB.db
+
+%sql Select Count(*) From ChicagoCrimeData
+
+%sql Select COMMUNITY_AREA_NUMBER,COMMUNITY_AREA_NAME From ChicagoCensusData WHERE PER_CAPITA_INCOME < 11000
+
+%sql Select Count(*) From ChicagoCrimeData Where PRIMARY_TYPE = 'OFFENSE INVOLVING CHILDREN' And Description Like "%CHILD%"
+
+%sql Select * From ChicagoCrimeData WHERE Description Like "%Child%"
+
+%sql Select * From ChicagoCrimeData WHERE LOCATION_DESCRIPTION LIKE '%SCHOOL%'
+
+%sql Select "Elementary, Middle, or High School", Avg(SAFETY_SCORE) From ChicagoPublicSchools\
+Group By "Elementary, Middle, or High School"
+
+%sql Select COMMUNITY_AREA_NAME, PERCENT_HOUSEHOLDS_BELOW_POVERTY From ChicagoCensusData \
+    order by PERCENT_HOUSEHOLDS_BELOW_POVERTY DESC LIMIT 5
+
+%sql Select Community_Area_Number, Count(*) As Cases From ChicagoCrimeData Group by Community_Area_Number Order by Cases Desc Limit 1
+
+%sql Select COMMUNITY_AREA_NAME From ChicagoCensusData Where HARDSHIP_INDEX = (Select Max(HARDSHIP_INDEX) From ChicagoCensusData)
+
+%sql Select Community_Area_Name From ChicagoCensusData Where Community_Area_Number = (Select Community_Area_Number From ChicagoCensusData Group by Community_Area_Number Order by Count(*) Limit 1)
+
+
+
