@@ -1,0 +1,31 @@
+import csv, sqlite3
+
+con = sqlite3.connect("RealWorldData.db")
+cur = con.cursor()
+
+!pip install pandas
+!pip install ipython-sql prettytable
+
+import prettytable
+prettytable.DEFAULT = 'DEFAULT'
+
+!pip install ipython-sql
+%load_ext sql
+
+%sql sqlite:///RealWorldData.db
+
+import pandas as pd
+df = pd.read_csv("https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DB0201EN-SkillsNetwork/labs/FinalModule_Coursera_V5/data/ChicagoPublicSchools.csv")
+df.to_sql("CHICAGO_PUBLIC_SCHOOLS_DATA",con,if_exists='replace', index=False, method='multi')
+
+# type in your query to retrieve list of all tables in the database
+%sql SELECT name FROM sqlite_master WHERE type='table'
+
+# type in your query to retrieve the number of columns in the SCHOOLS table
+# %sql PRAGMA table_info([CHICAGO_PUBLIC_SCHOOLS_DATA])
+
+%sql SELECT count(name) FROM PRAGMA_TABLE_INFO('CHICAGO_PUBLIC_SCHOOLS_DATA');
+
+# type in your query to retrieve all column names in the SCHOOLS table along with their datatypes and length
+%sql SELECT name,type,length(type) FROM PRAGMA_TABLE_INFO('CHICAGO_PUBLIC_SCHOOLS_DATA');
+
