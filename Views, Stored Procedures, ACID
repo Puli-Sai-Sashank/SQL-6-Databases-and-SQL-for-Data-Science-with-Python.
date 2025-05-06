@@ -1,3 +1,7 @@
+#Views are a dynamic mechanism for presenting data from one or more tables.
+A transaction represents a complete unit of work, which can be one or more SQL statements.
+
+
 #CREATE A VIEW
 CREATE VIEW EMPSALARY AS
 SELECT EMP_ID, F_NAME, L_NAME, B_DATE, SEX, SALARY
