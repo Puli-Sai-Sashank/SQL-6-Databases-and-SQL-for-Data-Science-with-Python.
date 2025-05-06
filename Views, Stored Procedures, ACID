@@ -1,0 +1,167 @@
+#CREATE A VIEW
+CREATE VIEW EMPSALARY AS
+SELECT EMP_ID, F_NAME, L_NAME, B_DATE, SEX, SALARY
+FROM EMPLOYEES;
+SELECT * FROM EMPSALARY;
+
+#UPDATE A VIEW
+CREATE OR REPLACE VIEW EMPSALARY AS
+SELECT EMP_ID, F_NAME, L_NAME, B_DATE, SEX, JOB_TITLE,
+MIN_SALARY, MAX_SALARY
+FROM EMPLOYEES, JOBS
+WHERE EMPLOYEES.JOB_ID = JOBS.JOB_IDENT;
+SELECT * FROM EMPSALARY;
+
+#DROP A VIEW
+DROP VIEW EMPSALARY;
+
+
+
+
+
+
+#Stored Procedures in SQL are a type of database object that allow you to encapsulate a series of SQL statements into a single routine. 
+They are stored in the database data dictionary and can be invoked from an application program or from the database command interface. 
+Stored procedures can accept input parameters and return multiple values of output parameters. They can also include control-of-flow constructs such as loops and conditional statements. 
+Stored procedures offer several benefits including improved performance, higher productivity, ease of use, and increased scalability. 
+They also provide a mechanism for enforcing business rules and data integrity in the database system.
+
+
+DELIMITER //
+
+CREATE PROCEDURE RETRIEVE_ALL()
+
+BEGIN
+   SELECT *  FROM PETSALE;
+END //
+DELIMITER ;
+
+CALL RETRIEVE_ALL;
+
+DROP PROCEDURE RETRIEVE_ALL;
+
+CALL RETRIEVE_ALL;
+
+
+
+
+#EXERCISE
+You will create a stored procedure routine named UPDATE_SALEPRICE with parameters Animal_ID and Animal_Health.
+
+This UPDATE_SALEPRICE routine will contain SQL queries to update the sale price of the animals in the PETSALE table depending on their health conditions, BAD or WORSE.
+
+This procedure routine will take animal ID and health conditon as parameters which will be used to update the sale price of animal in the PETSALE table by an amount depending on their health condition. Suppose that:
+
+For animal with ID XX having BAD health condition, the sale price will be reduced further by 25%.
+For animal with ID YY having WORSE health condition, the sale price will be reduced further by 50%.
+For animal with ID ZZ having other health condition, the sale price won't change.
+
+DELIMITER @
+CREATE PROCEDURE UPDATE_SALEPRICE (IN Animal_ID INTEGER, IN Animal_Health VARCHAR(5))
+BEGIN
+    IF Animal_Health = 'BAD' THEN
+        UPDATE PETSALE
+        SET SALEPRICE = SALEPRICE - (SALEPRICE * 0.25)
+        WHERE ID = Animal_ID;
+    ELSEIF Animal_Health = 'WORSE' THEN
+        UPDATE PETSALE
+        SET SALEPRICE = SALEPRICE - (SALEPRICE * 0.5)
+        WHERE ID = Animal_ID;
+    ELSE
+        UPDATE PETSALE
+        SET SALEPRICE = SALEPRICE
+        WHERE ID = Animal_ID;
+    END IF;
+END @
+
+DELIMITER ;
+
+   CALL RETRIEVE_ALL;
+DROP PROCEDURE UPDATE_SALEPRICE;
+
+CALL UPDATE_SALEPRICE;
+
+CALL UPDATE_SALEPRICE(1, 'BAD');
+
+CALL RETRIEVE_ALL;
+
+
+
+
+
+
+
+
+
+
+#A transaction is simply a sequence of operations performed using one or more SQL statements as a single logical unit of work. A database transaction must be ACID (Atomic, Consistent, Isolated and Durable). 
+The effects of all the SQL statements in a transaction can either be applied to the database using the COMMIT command or undone from the database using the ROLLBACK command.
+
+DELIMITER //
+
+CREATE PROCEDURE TRANSACTION_ROSE()
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    START TRANSACTION;
+    UPDATE BankAccounts
+    SET Balance = Balance-200
+    WHERE AccountName = 'Rose';
+
+    UPDATE BankAccounts
+    SET Balance = Balance+200
+    WHERE AccountName = 'Shoe Shop';
+
+    UPDATE ShoeShop
+    SET Stock = Stock-1
+    WHERE Product = 'Boots';
+
+    UPDATE BankAccounts
+    SET Balance = Balance-300
+    WHERE AccountName = 'Rose';
+
+    COMMIT;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE TRANSACTION_JAMES()
+
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE BankAccounts
+    SET Balance = Balance-1200
+    WHERE AccountName = 'James';
+
+    UPDATE BankAccounts
+    SET Balance = Balance+1200
+    WHERE AccountName = 'Shoe Shop';
+
+    UPDATE ShoeShop
+    SET Stock = Stock-4
+    WHERE Product = 'Trainers';
+
+    UPDATE BankAccounts
+    SET Balance = Balance-150
+    WHERE AccountName = 'James';
+
+    COMMIT;
+
+END //
+
+DELIMITER ; 
+
+
+
